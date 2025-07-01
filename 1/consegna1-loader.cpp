@@ -76,6 +76,33 @@ void optimized_insertion_sort(int *A, int p, int r) {
 
 }
 
+//Counting sort with bit manipulation
+void count_opt_sort(int *A, int p, int r){
+    int n = r - p + 1; //dim sub-array
+
+    const int min_valore = 0;
+    const int max_valore = 10500;
+    const int range = max_valore + 1;  // 10501 posizioni (0 ,1 , ... , 10500)
+
+    unsigned short *count = new unsigned short[range](); //0 inizializzato
+
+    for (int i = p; i <= r; i++){
+        ct_read++;
+        count[A[i]]++; //incremento contatore
+    }
+
+    int index = p;
+    for (int val = 0; val < range; val++){
+        ct_read++;
+        unsigned short frequenza = count[val];
+        while(frequenza-- > 0){
+            A[index++] = val;
+        }
+    }
+}
+
+
+
 
 int parse_cmd(int argc, char **argv) {
 
@@ -156,8 +183,11 @@ int main(int argc, char **argv) {
         ct_cmp = 0;
         ct_read = 0;
 
-        /// algoritmo di sorting
-        optimized_insertion_sort(A, 0, n-1);
+        /// algoritmo di sorting insertion
+        //optimized_insertion_sort(A, 0, n-1);
+
+        ///  algortimo di counting 
+        count_opt_sort(A, 0, n-1);
 
         if (details) {
             printf("Output:\n");
