@@ -36,6 +36,15 @@ void print_array(int *A, int dim) {
     printf("\n");
 }
 
+bool is_sorted(int *A, int dim) {
+    for (int i = 1; i < dim; i++) {
+        if (A[i] < A[i-1]) {
+            return false;
+        }
+    }
+    return true;
+}
+
 void swap(int &a, int &b) {
     int tmp = a;
     a = b;
@@ -44,39 +53,7 @@ void swap(int &a, int &b) {
     ct_swap++;
 }
 
-//Insertion sort ottimizzato per dati quasi ordinati
-void optimized_insertion_sort(int *A, int p, int r) {
-    for (int i = p + 1; i <= r; i++) {
-        ct_read++;
-        int key = A[i];
-        int j = i -1;
 
-        // se è gia nella posizione corretta => SKIP
-
-        if (j >= p) {
-            ct_read++;
-            if (A[j] <= key) {
-                continue; //posizione corretta
-            }
-        }
-
-        while (j >= p){
-            ct_read++;
-            if (A[j] <= key) {
-                break; 
-            }
-            A[j+1] = A[j]; //sposto senza lettura aggiuntiva
-            j--;
-        }
-
-        //inserisci elemento nella posizione corretta
-        A[j+1] = key;
-    }
-    
-
-}
-
-//Counting sort with bit manipulation
 void count_opt_sort(int *A, int p, int r){
     int n = r - p + 1; //dim sub-array
 
@@ -101,6 +78,56 @@ void count_opt_sort(int *A, int p, int r){
     }
 }
 
+void count_opt_sort_bitmap(int *A, int p, int r) {
+    const int min_valore = 0;
+    const int max_valore = 10500;
+    const int range = max_valore - min_valore + 1; // 10501
+    const int bitmap_size = (range + 7) / 8; // 1313 byte
+
+    unsigned short *count = new unsigned short[range]();
+    unsigned char *bitmap = new unsigned char[bitmap_size]();
+    int index = p;
+
+    // Fase 1: conteggio e aggiornamento bitmap
+    for (int i = p; i <= r; i++) {
+        ct_read++; // Lettura A[i]
+        int val = A[i];
+        if (val < min_valore || val > max_valore) continue;
+        int idx = val;
+
+        ct_read++; // Lettura count[idx]
+        count[idx]++;
+
+        int byte_idx = idx / 8;
+        int bit_idx = idx % 8;
+        ct_read++; // Lettura bitmap[byte_idx]
+        if ((bitmap[byte_idx] & (1 << bit_idx)) == 0) {
+            bitmap[byte_idx] |= (1 << bit_idx);
+        }
+    }
+
+    // Fase 2: scrittura valori ordinati
+    for (int byte_idx = 0; byte_idx < bitmap_size; byte_idx++) {
+        ct_read++; // Lettura bitmap[byte_idx]
+        unsigned char byte = bitmap[byte_idx];
+        if (byte == 0) continue;
+        for (int bit_idx = 0; bit_idx < 8; bit_idx++) {
+            if (byte & (1 << bit_idx)) {
+                int val = byte_idx * 8 + bit_idx;
+                if (val < range) {
+                    ct_read++; // Lettura count[val]
+                    unsigned short freq = count[val];
+                    while (freq-- > 0) {
+                        A[index++] = val;
+                    }
+                }
+            }
+        }
+    }
+
+    delete[] count;
+    delete[] bitmap;
+}
 
 
 
@@ -183,11 +210,19 @@ int main(int argc, char **argv) {
         ct_cmp = 0;
         ct_read = 0;
 
-        /// algoritmo di sorting insertion
-        //optimized_insertion_sort(A, 0, n-1);
-
-        ///  algortimo di counting 
+        //count_opt_sort(A, 0, n-1);
         count_opt_sort(A, 0, n-1);
+
+        if (!is_sorted(A, n)) {
+            printf("ERRORE: Array non ordinato correttamente al test %d!\n", test);
+            if (details) {
+                printf("Array risultante:\n");
+                print_array(A, n);
+            }
+            return 1; 
+        } else if (details) {
+            printf("✓ Array ordinato correttamente\n");
+        }
 
         if (details) {
             printf("Output:\n");

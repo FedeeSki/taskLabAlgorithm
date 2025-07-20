@@ -156,7 +156,42 @@ N test: 100, Min: 11501, Med: 11501.0, Max: 11501
 ```
 
 ## Posso fare meglio?
-- Punto chiave: evitare le 11501 letture di:
+- Punto chiave: evitare le 10501 letture di:
 ```c 
 unsigned short frequenza = count[val];
 ```
+
+- il problema è che leggo tutto il range teorico ovvero 10501 letture che mi ammazza letteralmente.
+
+Per ottimizzare ulteriormente l'algoritmo di ordinamento e ridurre il numero di accessi in memoria, ho implementato una versione avanzata del Counting Sort che utilizza una bitmap per registrare i valori distinti. Questo approccio riduce significativamente i letture necessarie durante la fase di scrittura dell'array ordinato.
+
+Modifiche Implementate:
+Bitmap per Valori Distinti:
+
+Invece di scorrere l'intero range (0-10500), una bitmap registra quali valori sono presenti nell'array.
+
+La bitmap è un array di byte dove ogni bit rappresenta la presenza (1) o assenza (0) di un valore nel range.
+
+Fase di Conteggio Aggiornata:
+
+Per ogni elemento:
+
+Incrementa il conteggio del valore.
+
+Aggiorna la bitmap per segnalare la presenza del valore (se non già registrato).
+
+Ogni accesso agli array (A, count, bitmap) viene contato come lettura.
+
+Fase di Scrittura Efficiente:
+
+Scorre la bitmap anziché l'intero range.
+
+Per ogni bit attivo nella bitmap, legge il conteggio corrispondente e scrive il valore nell'array ordinato.
+
+I valori sono scritti in ordine crescente grazie alla scansione sequenziale della bitmap.
+
+Calcolo Efficiente della Bitmap:
+
+La dimensione della bitmap è calcolata come (range + 7) / 8 per coprire tutto il range con un minimo di byte.
+
+L'indicizzazione nella bitmap sfrutta divisione e modulo per byte e bit.
