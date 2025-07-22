@@ -35,7 +35,18 @@ private:
     void flipTreeHelper(T_Node* node);
     void printNodeDepthsHelper(T_Node* node, int currentDepth);
     int isBalancedHelper(T_Node* node);
-    
+    bool isCompleteHelper(T_Node* node, int index, int nodeCount);
+
+    //Helper per approccio path-based per LCA
+    bool findPath(T_Node* node, T_Node** path, int& pathLength, int target);
+    /*
+    T_Node* node => nodo corrente che stiamo visitando (chiamta ricorsiva)
+    T_Node** path => array di puntatori a nodi, memorizza percorso dalla radice al target, pe riferimento
+    int& pathLenght => lunghezza corrente path
+    int target => valore nodo che cerchiamo
+    */
+    T_Node* findLCAHelper(int value1, int value2);
+
 public:
     // Costruttore e Distruttore
     B_Tree();
@@ -53,6 +64,8 @@ public:
     // Funzione per generare file DOT
     void generateDotFile(const std::string& filename = "tree.dot");
     
+    //////////////////////////////////////////////////////////////////////////////////////
+
     // Funzione per flip dell'albero
     void flipTree();
     
@@ -61,6 +74,14 @@ public:
     
     // Funzione per verificare se l'albero è bilanciato
     bool isBalanced();
+
+    // Funzione isComplete => flag indica se albero è completo
+
+    bool isComplete();
+
+    // Funzione findLCA per trovare il Lowest Common Ancestor
+
+    int findLCA();
 
 
 };
@@ -432,6 +453,144 @@ bool B_Tree::isBalanced() {
     return balanced;
 }
 
+// Funzione helper per verificare se l'albero è completo
+bool B_Tree::isCompleteHelper(T_Node* node, int index, int nodeCount) {
+    // Caso base: nodo vuoto è considerato valido
+    if (node == nullptr) {
+        return true;
+    }
+    
+    // Se l'indice è >= numero totale di nodi, l'albero non è completo
+    if (index >= nodeCount) {
+        return false;
+    }
+    
+    // Verifica ricorsivamente i sottoalberi
+    // Figlio sinistro ha indice 2*i + 1, figlio destro ha indice 2*i + 2
+    return isCompleteHelper(node->left, 2 * index + 1, nodeCount) &&
+           isCompleteHelper(node->right, 2 * index + 2, nodeCount);
+}
+
+// Funzione pubblica per verificare se l'albero è completo
+bool B_Tree::isComplete() {
+    if (root == nullptr) {
+        std::cout << "🌿 Albero vuoto: considerato completo per definizione." << std::endl;
+        return true;
+    }
+    
+    std::cout << "🔍 Verificando se l'albero è completo..." << std::endl;
+    
+    // Conta il numero totale di nodi
+    int nodeCount = countNodes(root);
+    
+    // Verifica se l'albero è completo usando l'indicizzazione
+    bool complete = isCompleteHelper(root, 0, nodeCount);
+    
+    if (complete) {
+        std::cout << "✅ L'albero È COMPLETO!" << std::endl;
+        std::cout << "   Tutti i livelli sono pieni eccetto possibilmente l'ultimo," << std::endl;
+        std::cout << "   che è riempito da sinistra a destra. (Nodi: " << nodeCount << ")" << std::endl;
+    } else {
+        std::cout << "❌ L'albero NON è completo!" << std::endl;
+        std::cout << "   Esistono dei \"buchi\" nella struttura dell'albero." << std::endl;
+        std::cout << "   I nodi non seguono l'ordine di riempimento da sinistra a destra." << std::endl;
+    }
+    
+    return complete;
+}
+
+// Funzione helper per trovare il percorso dalla radice a un nodo target (LCA path-based)
+bool B_Tree::findPath(T_Node* node, T_Node** path, int& pathLength, int target) {
+    // Caso base: nodo vuoto
+    if (node == nullptr) {
+        return false;
+    }
+    
+    // Aggiungi il nodo corrente al percorso
+    path[pathLength] = node;
+    pathLength++;
+    
+    // Se abbiamo trovato il target, il percorso è completo
+    if (node->data == target) {
+        return true;
+    }
+    
+    // Cerca ricorsivamente nei sottoalberi
+    if (findPath(node->left, path, pathLength, target) || 
+        findPath(node->right, path, pathLength, target)) {
+        return true;
+    }
+    
+    // Se non trovato in questo percorso, rimuovi il nodo corrente (backtracking)
+    pathLength--;
+    return false;
+}
+
+// Funzione helper per trovare LCA usando l'approccio path-based
+T_Node* B_Tree::findLCAHelper(int value1, int value2) {
+    // Array per memorizzare i percorsi (assumiamo altezza massima 100)
+    const int MAX_NODES = 100;
+    T_Node* path1[MAX_NODES];
+    T_Node* path2[MAX_NODES];
+    int pathLength1 = 0;
+    int pathLength2 = 0;
+    
+    // Trova i percorsi dalla radice ai due nodi
+    bool found1 = findPath(root, path1, pathLength1, value1);
+    bool found2 = findPath(root, path2, pathLength2, value2);
+    
+    // Se uno dei due valori non è stato trovato
+    if (!found1 || !found2) {
+        return nullptr;
+    }
+    
+    // Confronta i percorsi per trovare il primo nodo diverso
+    int i;
+    for (i = 0; i < pathLength1 && i < pathLength2; i++) {
+        if (path1[i] != path2[i]) {
+            // Il nodo precedente è il LCA
+            return path1[i-1];
+        }
+    }
+    
+    // Se entrambi i valori sono uguali o uno è antenato dell'altro
+    // Il LCA è l'ultimo nodo comune nei percorsi
+    return path1[i-1];
+}
+
+// Funzione pubblica per trovare il Lowest Common Ancestor
+int B_Tree::findLCA() {
+    if (root == nullptr) {
+        std::cout << "❌ Impossibile trovare LCA: l'albero è vuoto!" << std::endl;
+        return -1;
+    }
+    
+    int value1, value2;
+    std::cout << "🔸 Inserisci il primo valore: ";
+    std::cin >> value1;
+    std::cout << "🔸 Inserisci il secondo valore: ";
+    std::cin >> value2;
+    
+    if (value1 == value2) {
+        std::cout << "💡 I due valori sono uguali. LCA = " << value1 << std::endl;
+        return value1;
+    }
+    
+    std::cout << "🔍 Cercando il Lowest Common Ancestor di " << value1 << " e " << value2 << "..." << std::endl;
+    
+    T_Node* lcaNode = findLCAHelper(value1, value2);
+    
+    if (lcaNode != nullptr) {
+        std::cout << "✅ LCA trovato: " << lcaNode->data << std::endl;
+        std::cout << "   Il nodo " << lcaNode->data << " è l'antenato comune più basso" << std::endl;
+        std::cout << "   che contiene entrambi i valori " << value1 << " e " << value2 << " nel suo sottoalbero." << std::endl;
+        return lcaNode->data;
+    } else {
+        std::cout << "❌ Uno o entrambi i valori non sono presenti nell'albero!" << std::endl;
+        return -1;
+    }
+}
+
 // Funzione main
 int main() {
     B_Tree tree;
@@ -482,6 +641,8 @@ int main() {
         std::cout << "║  1. 🔄 Flip albero (scambia sottoalberi sx/dx)       ║" << std::endl;
         std::cout << "║  2. 📏 Calcola profondità nodi                       ║" << std::endl;
         std::cout << "║  3. ⚖️  Verifica se albero è bilanciato              ║" << std::endl;
+        std::cout << "║  6. C  Verifica se albero è Completo                 ║" << std::endl;
+        std::cout << "║  7. 🎯LCA trova LCA di 2 valori (nodi)               ║" << std::endl;
         std::cout << "║  4. 📊 Mostra albero                                 ║" << std::endl;
         std::cout << "║  5. 🎨 Genera file DOT                               ║" << std::endl;
         std::cout << "║  q. ❌ Esci                                          ║" << std::endl;
@@ -516,7 +677,17 @@ int main() {
                 std::cout << "\n⚖️  VERIFICA BILANCIAMENTO:" << std::endl;
                 tree.isBalanced();
                 break;
-                
+
+            case '6':
+                std::cout << "\nC  VERIFICA COMPLETEZZA:" << std::endl;
+                tree.isComplete();
+                break;
+
+            case '7':
+                std::cout << "\n🎯  RICERCA LCA:" << std::endl;
+                tree.findLCA();
+                break;
+
             case '4':
                 std::cout << "\n📊 ALBERO CORRENTE:" << std::endl;
                 tree.display();
@@ -529,7 +700,7 @@ int main() {
             }
             
             default:
-                std::cout << "❌ Scelta non valida! Usa 1, 2, 3, 4, 5 o 'q' per uscire." << std::endl;
+                std::cout << "❌ Scelta non valida! Usa 1, 2, 3, 4, 5, 6, 7 o 'q' per uscire." << std::endl;
                 break;
         }
     }

@@ -1,4 +1,4 @@
-## Consegna 2
+# Consegna 2
 
 Scrivere le funzioni per ottenere i seguenti output (in input un albero binario):
 
@@ -8,7 +8,7 @@ Scrivere le funzioni per ottenere i seguenti output (in input un albero binario)
 - Funzione isComplete: restituire un flag che indiche se l'albero è completo secondo la definizione classica
 - Funzione Lowest Common Ancestor: dati due valori presenti nell'albero, restituire il valore del nodo piu' basso che contiene entrambi nel suo sottoalbero
 
-# Diario di bordo
+## Diario di bordo
 
 1. **Struttura base dell'albero binario**
    - Creata struct `T_Node` per i nodi
@@ -29,17 +29,19 @@ Scrivere le funzioni per ottenere i seguenti output (in input un albero binario)
 
 ## Comandi per visualizzazione grafica
 
-### Compilazione:
+### Compilazione
+
 ```bash
 g++ consegena2_bTree.cpp -o bTree
 ```
 
-### Esecuzione:
+### Esecuzione
+
 ```bash
 ./bTree
 ```
 
-### Generazione immagine da file DOT (richiede Graphviz):
+### Generazione immagine da file DOT (richiede Graphviz)
 
 ```bash
 # Installa Graphviz (se non presente)
@@ -103,6 +105,7 @@ Early exit: Appena troviamo un sottoalbero sbilanciato, fermiamo tutto senza con
 Riuso dei risultati: L'altezza calcolata durante la verifica viene riutilizzata per il nodo padre
 
 **Approccio scelto:**
+
 Ottimizzazioni implementate:
 
 1. Short-circuit evaluation: if (leftHeight == -1) return -1;
@@ -116,7 +119,7 @@ Questo è un esempio classico di programmazione dinamica applicata agli alberi: 
 - **Operazione**:
   1. Calcola ricorsivamente l'altezza del sottoalbero sinistro
   2. Se sinistro non bilanciato (ritorna -1), propaga il -1
-  3. Calcola ricorsivamente l'altezza del sottoalbero destro  
+  3. Calcola ricorsivamente l'altezza del sottoalbero destro
   4. Se destro non bilanciato (ritorna -1), propaga il -1
   5. Verifica se la differenza di altezza è ≤ 1
   6. Se sì, ritorna l'altezza corrente; se no, ritorna -1
@@ -126,3 +129,57 @@ Questo è un esempio classico di programmazione dinamica applicata agli alberi: 
 
 - Tempo: O(n) - ogni nodo visitato una sola volta
 - Spazio: O(h) - stack ricorsivo profondo quanto l'altezza dell'albero
+
+### 4. Verifica se l'albero è completo (isComplete)
+
+**Ragionamento e implementazione:**
+
+Un albero binario è completo se tutti i suoi livelli, eccetto eventualmente l'ultimo, sono completamente riempiti e se tutti i nodi dell'ultimo livello sono il più a sinistra possibile.
+
+**Approccio scelto:**
+
+L'approccio si basa sull'indicizzazione dei nodi come se fossero in un array (heap-like).
+
+- Radice: indice 0
+- Figlio sinistro di un nodo `i`: `2*i + 1`
+- Figlio destro di un nodo `i`: `2*i + 2`
+
+1. **Conteggio nodi**: Per prima cosa, si calcola il numero totale di nodi `n` nell'albero con una visita preliminare (O(n)).
+2. **Funzione helper ricorsiva**: `isCompleteHelper(T_Node* node, int index, int n)`
+3. **Caso base**: Se il nodo è `nullptr`, il percorso è valido (ritorna `true`).
+4. **Verifica indice**: Se l'indice `index` del nodo corrente è maggiore o uguale a `n`, significa che c'è un "buco" nella struttura, quindi l'albero non è completo (ritorna `false`).
+5. **Ricorsione**: Si richiama la funzione sui figli sinistro e destro, passando i loro indici calcolati. L'albero è completo solo se entrambe le chiamate ricorsive ritornano `true`.
+
+**Complessità:**
+
+- Tempo: O(n) - richiede due visite. Una per contare i nodi e una per verificare la completezza.
+- Spazio: O(h) - stack ricorsivo profondo quanto l'altezza dell'albero
+
+### 5. Lowest Common Ancestor (LCA)
+
+**Ragionamento e implementazione:**
+
+Dati due nodi, l'LCA è il nodo più profondo nell'albero che li ha entrambi come discendenti.
+
+**Approccio scelto**: Path-based
+
+La logica è trovare i percorsi dalla radice a ciascuno dei due nodi e poi trovare l'ultimo nodo in comune in questi due percorsi.
+
+1. **Subroutine `findPath()`**:
+   - **Scopo**: Trovare e memorizzare il percorso da un nodo radice a un nodo target.
+   - **Implementazione**: Funzione ricorsiva che esegue un attraversamento. Aggiunge il nodo corrente al percorso e, se è il target, ritorna `true`. Altrimenti, cerca ricorsivamente nei sottoalberi sinistro e destro. Se il target non viene trovato in nessun sottoalbero, il nodo corrente viene rimosso dal percorso (backtracking) e la funzione ritorna `false`.
+   - **Parametri**: Usa un array di puntatori a nodi e un intero passato per riferimento per tenere traccia della lunghezza del percorso.
+
+2. **Funzione `findLCAHelper()`**:
+   - **Operazione**:
+     1. Chiama `findPath()` due volte per ottenere i percorsi per i due valori dati.
+     2. Se uno dei due percorsi non viene trovato, significa che uno dei nodi non è nell'albero, quindi ritorna `nullptr`.
+     3. Scorre entrambi gli array dei percorsi contemporaneamente con un indice `i`.
+     4. Si ferma quando i nodi ai due percorsi all'indice `i` non corrispondono più.
+     5. L'LCA è il nodo all'indice `i-1`, ovvero l'ultimo nodo in comune.
+   - **Limitazione**: Per evitare di usare la STL, si utilizzano array C-style di dimensione fissa (`MAX_NODES = 100`), assumendo che l'albero non superi questa altezza.
+
+**Complessità:**
+
+- Tempo: O(n) - nel caso peggiore, `findPath` deve visitare tutti i nodi. L'operazione viene eseguita due volte, e il confronto richiede O(h). Il totale è dominato da O(n).
+- Spazio: O(h) - per memorizzare i due percorsi, la cui lunghezza massima è l'altezza dell'albero
