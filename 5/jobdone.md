@@ -51,6 +51,52 @@ Per soddisfare la richiesta di analizzare la scomposizione gerarchica, l'algorit
 
 - **Modifica a `kruskalMST`**: La funzione principale è stata modificata per invocare `printClusters` dopo l'aggiunta di un numero specifico di archi. Questo permette di "fotografare" la formazione dei cluster e osservare come i nodi si aggregano in base agli archi di peso minore, offrendo una visione chiara della coerenza dei dati rappresentati.
 
-### 5. Gestione della Memoria
+### 5. Scelta e Preparazione del Dataset
+
+Per applicare l'algoritmo a un caso di studio reale, è stato scelto un dataset rappresentante la **rete stradale della città di Bologna**.
+
+- **Fonte:** Il dataset è stato ottenuto da [OpenData Bologna](https://opendata.comune.bologna.it/explore/dataset/rifter_arcstra_li/export/) e pre-elaborato per ottenere un formato `sorgente,destinazione,peso`, dove il peso corrisponde alla lunghezza in metri dell'arco stradale.
+- **Caratteristiche:** Il grafo risultante è pesato, non orientato e contiene un numero di nodi e archi sufficientemente grande per un'analisi significativa, superando ampiamente il requisito di 100 nodi.
+
+Per poter utilizzare questo dataset, è stata implementata una funzione `loadGraphFromFile`. Una sfida chiave è stata la gestione degli ID dei nodi, che nel file originale non sono sequenziali (es. `15622`, `5772`). Per risolvere questo problema, è stata utilizzata una `std::map` per creare una mappatura bidirezionale tra gli ID originali e gli indici interni del programma (da `0` a `V-1`), un compromesso necessario per l'interfacciamento con dati reali.
+
+### 6. Analisi Gerarchica e Visualizzazione con Graphviz
+
+Per migliorare l'analisi della scomposizione gerarchica, la visualizzazione è stata potenziata passando da un semplice output testuale a una rappresentazione grafica tramite **Graphviz**.
+
+- **Generazione di File `.dot`**: È stata creata una funzione `generateDotFile` che, a ogni "step" predefinito dell'algoritmo di Kruskal, esporta lo stato corrente dell'MST parziale in un file `.dot`.
+- **Contenuto del File `.dot`**: Ogni file generato non solo mostra gli archi dell'MST, ma raggruppa visivamente i nodi all'interno dei rispettivi cluster (componenti connesse), rendendo l'analisi della coesione geografica immediata.
+- **Analisi dei Risultati**: Eseguendo il programma, si osserva che i primi cluster a formarsi uniscono nodi geograficamente vicini (strade dello stesso quartiere), come previsto. Man mano che l'algoritmo procede e vengono aggiunti archi con peso maggiore, i cluster si fondono a formare macro-aree, dimostrando che la partizione gerarchica riflette coerentemente la topologia stradale della città.
+
+### 7. Analisi della Coerenza della Partizione Gerarchica
+
+L'esecuzione dell'algoritmo sul dataset della rete stradale di Bologna ha permesso di verificare che la scomposizione gerarchica prodotta è coerente con la natura dei dati.
+
+-   **Dopo 10 archi (le strade più corte)**: L'output mostra la formazione di cluster molto piccoli, spesso composti da sole due o tre nodi. Questo corrisponde alla connessione di incroci stradali estremamente vicini, come le due estremità di una breve via o nodi all'interno della stessa piazza. È il primo livello di aggregazione, basato sulla massima prossimità geografica.
+
+-   **Dopo 50 archi**: I cluster iniziano a fondersi, creando aggregati più grandi. Questo stadio rappresenta la formazione di piccoli "isolati" o "quartieri", dove le strade locali sono state interconnesse. La struttura gerarchica è evidente: i singoli punti si sono uniti in gruppi locali.
+
+-   **Dopo 100 archi**: I cluster sono ancora più estesi e il loro numero totale si riduce. In questa fase, l'algoritmo sta usando strade di collegamento più lunghe (con peso maggiore) per unire i quartieri precedentemente formati. Questo rappresenta la connessione di distretti più ampi della città.
+
+In conclusione, l'analisi dell'output a diversi stadi di esecuzione conferma che **la partizione gerarchica prodotta da Kruskal riflette fedelmente la struttura topologica della rete stradale**. L'algoritmo raggruppa prima i nodi più vicini e poi, in modo gerarchico, unisce questi gruppi per formare aree sempre più vaste, dimostrando una coerenza diretta tra il processo di clustering e la geografia della città.
+
+### [FUN-FACT] Kruskal come Algoritmo di Clustering Gerarchico
+
+L'analogia tra il funzionamento dell'algoritmo di Kruskal e il clustering gerarchico è corretta e molto pertinente. A tutti gli effetti, l'algoritmo di Kruskal può essere visto come un'implementazione di **clustering gerarchico agglomerativo (bottom-up)**.
+
+-   **Bottom-Up (dal basso verso l'alto):** L'algoritmo parte dalla situazione più frammentata possibile (ogni vertice è un cluster a sé) e, passo dopo passo, costruisce una struttura più grande e unificata, fino ad arrivare a un unico cluster che contiene tutti i nodi (l'MST).
+-   **Agglomerativo:** Ad ogni iterazione, l'algoritmo "agglomera", ovvero fonde insieme, i due cluster più vicini. La "vicinanza" è definita dal peso dell'arco più leggero che li collega.
+
+Questa corrispondenza è così diretta che Kruskal è l'esatta implementazione di una specifica tecnica di clustering chiamata **single-linkage clustering**, dove la distanza tra due cluster è definita come la distanza minima tra qualsiasi punto di un cluster e qualsiasi punto dell'altro.
+
+| Concetto in Kruskal          | Concetto nel Clustering Gerarchico |
+| :--------------------------- | :--------------------------------- |
+| Ogni vertice (incrocio)      | Ogni punto dato (data point)       |
+| Ogni componente connessa     | Ogni cluster                       |
+| Il peso di un arco (distanza) | La distanza tra due punti          |
+| Unire due componenti         | Fondere due cluster                |
+| L'MST finale                 | Il dendrogramma completo           |
+
+### 8. Gestione della Memoria
 
 La memoria per il grafo, gli archi e le strutture DSU è gestita manualmente tramite `new` e `delete[]`, senza fare affidamento su contenitori della STL. La funzione `destroyGraph` assicura che tutta la memoria allocata venga correttamente liberata.

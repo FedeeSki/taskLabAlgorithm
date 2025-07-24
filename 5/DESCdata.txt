@@ -1,0 +1,9 @@
+Prompt a DeepSeek R1: 
+Formatta il file in questo modo, dandomi un nuovo file .txt ,
+{ ID_nodo_sorgente, ID_nodo_destinazione  peso (lunghezza in metri) } approssima le distanze a intero.
+
+Il file dato in pasto a DeepSeek R1 è stato trovato:
+{https://opendata.comune.bologna.it/explore/dataset/rifter_arcstra_li/export/}
+
+DB Open dove si trovano i dati di tutti gli archi stradali di Bologna.
+
