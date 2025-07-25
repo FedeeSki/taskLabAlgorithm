@@ -58,7 +58,21 @@ Per applicare l'algoritmo a un caso di studio reale, è stato scelto un dataset 
 - **Fonte:** Il dataset è stato ottenuto da [OpenData Bologna](https://opendata.comune.bologna.it/explore/dataset/rifter_arcstra_li/export/) e pre-elaborato per ottenere un formato `sorgente,destinazione,peso`, dove il peso corrisponde alla lunghezza in metri dell'arco stradale.
 - **Caratteristiche:** Il grafo risultante è pesato, non orientato e contiene un numero di nodi e archi sufficientemente grande per un'analisi significativa, superando ampiamente il requisito di 100 nodi.
 
-Per poter utilizzare questo dataset, è stata implementata una funzione `loadGraphFromFile`. Una sfida chiave è stata la gestione degli ID dei nodi, che nel file originale non sono sequenziali (es. `15622`, `5772`). Per risolvere questo problema, è stata utilizzata una `std::map` per creare una mappatura bidirezionale tra gli ID originali e gli indici interni del programma (da `0` a `V-1`), un compromesso necessario per l'interfacciamento con dati reali.
+#### La Sfida dei Dati Reali e la Giustificazione dell'Uso di `std::map`
+
+Un punto cruciale nell'applicazione di algoritmi teorici a dataset del mondo reale è la gestione degli identificatori (ID) dei nodi.
+
+1.  **Il Problema: Dati Reali vs. Algoritmi Teorici**
+    *   **Algoritmo Teorico:** L'implementazione di Kruskal, basata su array C-style, richiede che i `V` vertici siano identificati da indici sequenziali (`0, 1, 2, ..., V-1`) per un accesso diretto ed efficiente alla memoria (es. `subsets[i]`).
+    *   **Dati Reali:** Il dataset di Bologna, come la maggior parte dei dati reali, utilizza ID non sequenziali e sparsi (es. `5772`, `15610`). Creare un array di dimensione 16000+ per soli 314 vertici sarebbe un enorme spreco di memoria e computazionalmente inefficiente.
+
+2.  **La Soluzione: `std::map` come "Traduttore"**
+    Per risolvere questo disallineamento, è stata fatta una scelta di design precisa: **isolare la logica di "adattamento" dei dati dalla logica "pura" dell'algoritmo**. `std::map` è stato utilizzato esclusivamente come un **traduttore bidirezionale** ai confini del programma:
+    *   **In Ingresso (`loadGraphFromFile`):** La `node_map` traduce gli ID originali (es. `5772`) in indici interni sequenziali (es. `0`). L'algoritmo di Kruskal lavora solo con questi indici interni.
+    *   **In Uscita (Stampa):** La `node_map_inv` ritraduce gli indici interni (es. `0`) negli ID originali (es. `5772`) per rendere l'output leggibile e significativo per l'utente.
+
+3.  **Conclusione della Giustificazione**
+    L'uso di `std::map` è confinato alla fase di I/O e pre-elaborazione. **La logica algoritmica principale (QuickSort, DSU, il ciclo di Kruskal) rimane pura e non dipende in alcun modo dalla STL**, operando esclusivamente su array e puntatori come da consegna. Questa scelta di design permette di interfacciare l'algoritmo con la complessità dei dati del mondo reale, mantenendo intatta la sua implementazione fondamentale.
 
 ### 6. Analisi Gerarchica e Visualizzazione con Graphviz
 
