@@ -1,5 +1,3 @@
-
-
 # Consegna 6
 
 **Testo della consegna:**
@@ -268,8 +266,6 @@ L'implementazione si basa su tre componenti principali:
      - Crea e riempie la matrice dei punteggi.
      - Esegue il backtracking per produrre la lista di azioni (MATCH, CHANGE, DELETE, INSERT).
 
-
-
 ### Aspetti Teorici e Motivazione
 
 L'obiettivo era realizzare un programma **semplice da spiegare**, ma che rispettasse la consegna e producesse un output utile e leggibile. In particolare:
@@ -294,3 +290,34 @@ Se richiesto un confronto ancora più robusto e preciso, si potrebbero implement
 - Ottimizzazioni sulle strutture dati e sulla gestione della memoria.
 
 Questi miglioramenti erano stati implementati in una versione precedente, ma sono stati rimossi per privilegiare la semplicità e la chiarezza, in linea con i requisiti della consegna.
+
+## Confronto tra Approccio Token-based e Approccio Carattere per Carattere
+
+Nel contesto del confronto tra versioni di codice sorgente, esistono due strategie principali:
+
+### 1. Approccio Token-based (adottato in questa soluzione)
+
+- Il codice viene prima suddiviso in una sequenza di token (parole chiave, identificatori, numeri, simboli, operatori).
+- L'allineamento viene effettuato tra queste sequenze di token, non tra singoli caratteri.
+- **Vantaggi:**
+  - Le differenze rilevate sono più "intelligenti", perché ignorano la formattazione e si concentrano su elementi sintattici rilevanti.
+  - Due file con la stessa logica ma formattazione diversa risultano identici.
+  - L'output delle differenze è più leggibile e significativo, riferito a token interi.
+- **Limiti:**
+  - Richiede un tokenizer affidabile: se troppo semplice, può produrre falsi positivi/negativi.
+  - Non rileva differenze minime all'interno di un token (es. cambio di una lettera in un identificatore).
+
+### 2. Approccio Carattere per Carattere (alternativa classica)
+
+- L'allineamento viene effettuato direttamente sulle stringhe di caratteri dei due file, senza suddividerli in token.
+
+- **Vantaggi:**
+  - Massima granularità: ogni differenza, anche minima (es. una lettera cambiata), viene rilevata.
+  - Semplicità di implementazione: non serve un tokenizer, basta lavorare su array di caratteri.
+- **Limiti:**
+  - Sensibile alla formattazione: cambi di spazi, tabulazioni o a capo vengono visti come differenze, anche se il significato del codice non cambia.
+  - Output meno leggibile: le azioni di match/insert/delete sono su singoli caratteri, rendendo difficile capire le reali modifiche strutturali.
+  - Non distingue tra elementi sintattici: non dà priorità a simboli strutturali o keyword.
+
+**Sintesi:**
+L'approccio token-based, adottato in questa soluzione, è più adatto per il confronto tra versioni di codice sorgente perché fornisce un'analisi più semantica e robusta. L'approccio carattere per carattere è invece più adatto per confronti testuali generici o per rilevare differenze minime non rilevanti a livello di struttura del codice.

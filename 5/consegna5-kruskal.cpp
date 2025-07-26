@@ -1,8 +1,60 @@
 #include <iostream>
 #include <fstream>
-#include <string>
+#include <string> //solo per DOT file...
 #include <sstream>
-#include <map>
+
+
+// ===================== Custom Map =====================
+struct MapEntry {
+    int key;
+    int value;
+};
+
+struct CustomMap {
+    MapEntry* entries;
+    int size;
+    int capacity;
+};
+
+void map_init(CustomMap* map, int capacity) {
+    map->entries = new MapEntry[capacity];
+    map->size = 0;
+    map->capacity = capacity;
+}
+
+void map_free(CustomMap* map) {
+    delete[] map->entries;
+    map->size = 0;
+    map->capacity = 0;
+}
+
+// Restituisce -1 se non trovato
+int map_get(const CustomMap* map, int key) {
+    for (int i = 0; i < map->size; ++i)
+        if (map->entries[i].key == key)
+            return map->entries[i].value;
+    return -1;
+}
+
+// Inserisce solo se non esiste già
+void map_insert(CustomMap* map, int key, int value) {
+    if (map_get(map, key) == -1) {
+        map->entries[map->size].key = key;
+        map->entries[map->size].value = value;
+        map->size++;
+    }
+}
+
+// Versione inversa: dato un indice interno, restituisce l'ID reale
+int map_get_inv(const CustomMap* map, int key) {
+    // La mappa inversa è key=indice interno, value=ID reale
+    for (int i = 0; i < map->size; ++i)
+        if (map->entries[i].key == key)
+            return map->entries[i].value;
+    return -1;
+}
+
+// ===========================================================================
 
 // Struttura per rappresentare un arco pesato nel grafo
 struct Edge {
@@ -118,21 +170,21 @@ void quickSort(Edge arr[], int low, int high) {
 }
 
 // Funzione per stampare i cluster (componenti connesse)
-void printClusters(Subset subsets[], int V, const std::map<int, int>& node_map_inv) {
+void printClusters(Subset subsets[], int V, const CustomMap& node_map_inv) {
     // Questo approccio è O(V^2) ma non richiede strutture dati complesse.
     // Itera su ogni potenziale radice.
     for (int i = 0; i < V; ++i) {
         // Se 'i' è il genitore di se stesso, allora è il rappresentante di un cluster.
         if (subsets[i].parent == i) {
             bool first = true;
-            std::cout << "  Cluster (radice " << node_map_inv.at(i) << "): { ";
+            std::cout << "  Cluster (radice " << map_get_inv(&node_map_inv, i) << "): { ";
             // Trova tutti i nodi che appartengono a questo cluster.
             for (int j = 0; j < V; ++j) {
                 if (find(subsets, j) == i) {
                     if (!first) {
                         std::cout << ", ";
                     }
-                    std::cout << node_map_inv.at(j);
+                    std::cout << map_get_inv(&node_map_inv, j);
                     first = false;
                 }
             }
@@ -142,7 +194,7 @@ void printClusters(Subset subsets[], int V, const std::map<int, int>& node_map_i
 }
 
 // Funzione per generare un file .dot per la visualizzazione con Graphviz
-void generateDotFile(const char* filename, Edge result[], int e, Subset subsets[], int V, const std::map<int, int>& node_map_inv) {
+void generateDotFile(const char* filename, Edge result[], int e, Subset subsets[], int V, const CustomMap& node_map_inv) {
     std::ofstream dotFile(filename);
     if (!dotFile.is_open()) {
         std::cerr << "Errore nell'apertura del file .dot" << std::endl;
@@ -157,10 +209,11 @@ void generateDotFile(const char* filename, Edge result[], int e, Subset subsets[
     for (int i = 0; i < V; i++) {
         if (subsets[i].parent == i) {
             dotFile << "  subgraph cluster_" << i << " {" << std::endl;
-            dotFile << "    label=\"Cluster " << node_map_inv.at(i) << "\";" << std::endl;
+            dotFile << "    label=\"Cluster " << map_get_inv(&node_map_inv, i) << "\";" << std::endl;
+            // ...
             for (int j = 0; j < V; j++) {
                 if (find(subsets, j) == i) {
-                    dotFile << "    " << node_map_inv.at(j) << ";" << std::endl;
+                    dotFile << "    " << map_get_inv(&node_map_inv, j) << ";" << std::endl;
                 }
             }
             dotFile << "  }" << std::endl;
@@ -169,19 +222,35 @@ void generateDotFile(const char* filename, Edge result[], int e, Subset subsets[
 
     // Aggiunge gli archi dell'MST
     for (int i = 0; i < e; i++) {
-        dotFile << "  " << node_map_inv.at(result[i].src) << " -- " << node_map_inv.at(result[i].dest)
+        dotFile << "  " << map_get_inv(&node_map_inv, result[i].src) << " -- " << map_get_inv(&node_map_inv, result[i].dest)
                 << " [label=\"" << result[i].weight << "\", len=" << result[i].weight / 100.0 << "];" << std::endl;
     }
 
     dotFile << "}" << std::endl;
     dotFile.close();
+
+    // Genera anche il PDF usando Graphviz (dot)
+    std::string pdf_filename = std::string(filename);
+    size_t pos = pdf_filename.rfind(".dot");
+    if (pos != std::string::npos) {
+        pdf_filename.replace(pos, 4, ".pdf");
+    } else {
+        pdf_filename += ".pdf";
+    }
+    std::string cmd = "dot -Tpdf '" + std::string(filename) + "' -o '" + pdf_filename + "'";
+    int ret = system(cmd.c_str());
+    if (ret == 0) {
+        std::cout << "File PDF generato: " << pdf_filename << std::endl;
+    } else {
+        std::cerr << "Errore nella generazione del PDF con Graphviz (dot)" << std::endl;
+    }
 }
 
 
 // Funzione principale che implementa l'algoritmo di Kruskal
-void kruskalMST(Graph* graph, const std::map<int, int>& node_map_inv) {
+void kruskalMST(Graph* graph, const CustomMap& node_map_inv) {
     int V = graph->V;
-    Edge* result = new Edge[V]; // L'MST avrà al massimo V-1 archi
+    Edge* result = new Edge[V-1]; // L'MST avrà al massimo V-1 archi
     int e = 0; // Indice per gli archi del risultato
     int i = 0; // Indice per gli archi ordinati
     int edges_to_show[] = {10, 50, 100}; // Mostra i cluster dopo aver aggiunto 10, 50 e 100 archi
@@ -230,7 +299,7 @@ void kruskalMST(Graph* graph, const std::map<int, int>& node_map_inv) {
     std::cout << "Archi del Minimum Spanning Tree (MST):" << std::endl;
     int totalWeight = 0;
     for (i = 0; i < e; ++i) {
-        std::cout << node_map_inv.at(result[i].src) << " -- " << node_map_inv.at(result[i].dest) << " (peso: " << result[i].weight << ")" << std::endl;
+        std::cout << map_get_inv(&node_map_inv, result[i].src) << " -- " << map_get_inv(&node_map_inv, result[i].dest) << " (peso: " << result[i].weight << ")" << std::endl;
         totalWeight += result[i].weight;
     }
     std::cout << "Peso totale dell'MST: " << totalWeight << std::endl;
@@ -240,7 +309,7 @@ void kruskalMST(Graph* graph, const std::map<int, int>& node_map_inv) {
 }
 
 // Funzione per caricare un grafo da un file di testo
-Graph* loadGraphFromFile(const char* filename, std::map<int, int>& node_map, std::map<int, int>& node_map_inv) {
+Graph* loadGraphFromFile(const char* filename, CustomMap& node_map, CustomMap& node_map_inv) {
     std::ifstream file(filename);
     if (!file.is_open()) {
         std::cerr << "Errore: Impossibile aprire il file " << filename << std::endl;
@@ -259,20 +328,20 @@ Graph* loadGraphFromFile(const char* filename, std::map<int, int>& node_map, std
     while (std::getline(file, line)) {
         std::stringstream ss(line);
         ss >> src >> comma >> dest >> comma >> weight;
-        if (node_map.find(src) == node_map.end()) {
-            node_map[src] = next_node_idx;
-            node_map_inv[next_node_idx] = src;
-            next_node_idx++;
-        }
-        if (node_map.find(dest) == node_map.end()) {
-            node_map[dest] = next_node_idx;
-            node_map_inv[next_node_idx] = dest;
-            next_node_idx++;
-        }
+    if (map_get(&node_map, src) == -1) {
+        map_insert(&node_map, src, next_node_idx);
+        map_insert(&node_map_inv, next_node_idx, src);
+        next_node_idx++;
+    }
+    if (map_get(&node_map, dest) == -1) {
+        map_insert(&node_map, dest, next_node_idx);
+        map_insert(&node_map_inv, next_node_idx, dest);
+        next_node_idx++;
+    }
         E++;
     }
 
-    int V = node_map.size();
+    int V = node_map.size;
     Graph* graph = createGraph(V, E);
 
     // Riavvolgiamo il file e lo rileggiamo per aggiungere gli archi
@@ -282,7 +351,7 @@ Graph* loadGraphFromFile(const char* filename, std::map<int, int>& node_map, std
     while (std::getline(file, line)) {
         std::stringstream ss(line);
         ss >> src >> comma >> dest >> comma >> weight;
-        addEdge(graph, node_map[src], node_map[dest], weight);
+        addEdge(graph, map_get(&node_map, src), map_get(&node_map, dest), weight);
     }
 
     file.close();
@@ -302,12 +371,16 @@ void destroyGraph(Graph* graph) {
 // Funzione main per testare il codice
 int main() {
     const char* filename = "deepseek_DATASET_graphBOLOGNA.txt";
-    std::map<int, int> node_map; // Mappa da ID originali a indici 0..V-1
-    std::map<int, int> node_map_inv; // Mappa inversa da indici a ID originali
+    CustomMap node_map; // Mappa da ID originali a indici 0..V-1
+    CustomMap node_map_inv; // Mappa inversa da indici a ID originali
+    map_init(&node_map, 2000); // Scegli una capacità massima ragionevole
+    map_init(&node_map_inv, 2000);
 
     Graph* graph = loadGraphFromFile(filename, node_map, node_map_inv);
 
     if (graph == nullptr) {
+        map_free(&node_map);
+        map_free(&node_map_inv);
         return 1; // Errore nel caricamento del file
     }
 
@@ -316,6 +389,8 @@ int main() {
 
     // Libera la memoria
     destroyGraph(graph);
+    map_free(&node_map);
+    map_free(&node_map_inv);
 
     return 0;
 }

@@ -45,46 +45,44 @@ bool is_sorted(int *A, int dim) {
     return true;
 }
 
-void swap(int &a, int &b) {
-    int tmp = a;
-    a = b;
-    b = tmp;
-    /// aggiorno contatore globale di swap
-    ct_swap++;
-}
+// void count_opt_sort(int *A, int p, int r){
+//     int n = r - p + 1; //dim sub-array
 
+//     const int min_valore = 0;
+//     const int max_valore = 10500;
+//     const int range = max_valore + 1;  // 10501 posizioni (0 ,1 , ... , 10500)
 
-void count_opt_sort(int *A, int p, int r){
-    int n = r - p + 1; //dim sub-array
+//     unsigned short *count = new unsigned short[range](); //0 inizializzato
 
-    const int min_valore = 0;
-    const int max_valore = 10500;
-    const int range = max_valore + 1;  // 10501 posizioni (0 ,1 , ... , 10500)
+//     for (int i = p; i <= r; i++){
+//         ct_read++;
+//         count[A[i]]++; //incremento contatore
+//     }
 
-    unsigned short *count = new unsigned short[range](); //0 inizializzato
-
-    for (int i = p; i <= r; i++){
-        ct_read++;
-        count[A[i]]++; //incremento contatore
-    }
-
-    int index = p;
-    for (int val = 0; val < range; val++){
-        ct_read++;
-        unsigned short frequenza = count[val];
-        while(frequenza-- > 0){
-            A[index++] = val;
-        }
-    }
-}
+//     int index = p;
+//     for (int val = 0; val < range; val++){
+//         ct_read++;
+//         unsigned short frequenza = count[val];
+//         while(frequenza-- > 0){
+//             A[index++] = val;
+//         }
+//     }
+// }
 
 void count_opt_sort_bitmap(int *A, int p, int r) {
     const int min_valore = 0;
     const int max_valore = 10500;
     const int range = max_valore - min_valore + 1; // 10501
     const int bitmap_size = (range + 7) / 8; // 1313 byte
-
-    unsigned short *count = new unsigned short[range]();
+    // Calcola il numero di byte necessari per rappresentare 'range' valori con una bitmap.
+    // Ogni byte contiene 8 bit, quindi si divide il range per 8.
+    // Si aggiunge 7 prima della divisione per arrotondare verso l'alto (così anche se il range non è multiplo di 8, si coprono tutti i valori).
+    // Esempio: se range=10501, (10501+7)/8 = 1313 byte, 
+    // sufficienti per rappresentare tutti i valori da 0 a 10500
+    
+    // occorennze
+    unsigned short *count = new unsigned short[range](); 
+    //valori "effettivamente" presenti
     unsigned char *bitmap = new unsigned char[bitmap_size]();
     int index = p;
 
@@ -101,7 +99,9 @@ void count_opt_sort_bitmap(int *A, int p, int r) {
         int byte_idx = idx / 8;
         int bit_idx = idx % 8;
         ct_read++; // Lettura bitmap[byte_idx]
+        // Operatore & (AND bit a bit): controlla se il bit in posizione bit_idx è già attivo (presenza del valore)
         if ((bitmap[byte_idx] & (1 << bit_idx)) == 0) {
+            // Operatore | (OR bit a bit): attiva il bit in posizione bit_idx per segnare la presenza del valore
             bitmap[byte_idx] |= (1 << bit_idx);
         }
     }
@@ -112,6 +112,7 @@ void count_opt_sort_bitmap(int *A, int p, int r) {
         unsigned char byte = bitmap[byte_idx];
         if (byte == 0) continue;
         for (int bit_idx = 0; bit_idx < 8; bit_idx++) {
+            // Operatore & (AND bit a bit): controlla se il bit in posizione bit_idx è attivo (valore presente)
             if (byte & (1 << bit_idx)) {
                 int val = byte_idx * 8 + bit_idx;
                 if (val < range) {
@@ -211,7 +212,7 @@ int main(int argc, char **argv) {
         ct_read = 0;
 
         //count_opt_sort(A, 0, n-1);
-        count_opt_sort(A, 0, n-1);
+        count_opt_sort_bitmap(A, 0, n-1);
 
         if (!is_sorted(A, n)) {
             printf("ERRORE: Array non ordinato correttamente al test %d!\n", test);

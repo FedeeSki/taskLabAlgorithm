@@ -199,3 +199,16 @@ Per ogni elemento:
 
 - La dimensione della bitmap è calcolata come (range + 7) / 8 per coprire tutto il range con un minimo di byte.
 - L'indicizzazione nella bitmap sfrutta divisione e modulo per byte e bit.
+
+#### Perché la bitmap è una soluzione furba
+
+L'uso della bitmap nella versione ottimizzata di counting sort permette di evitare la scansione completa di tutto il range di valori possibili durante la fase di scrittura. Invece di leggere il contatore di ogni valore da 0 a 10500 (anche per valori mai presenti), la bitmap consente di saltare direttamente ai soli valori effettivamente presenti nell'array. Questo riduce drasticamente il numero di letture in memoria, che è l'obiettivo principale della consegna.
+
+**In sintesi:**
+- La bitmap è un array di bit, dove ogni bit rappresenta la presenza o assenza di un valore nel range.
+- Durante la fase di conteggio, per ogni valore incontrato si aggiorna sia il contatore che il bit corrispondente nella bitmap.
+- Durante la fase di scrittura, si scorre solo la bitmap: per ogni bit attivo si legge il contatore e si scrive il valore nell'array ordinato.
+- Questo approccio è particolarmente efficace quando il range dei valori è molto più grande del numero di valori effettivamente presenti.
+
+**Risultato:**  
+Si ottiene un algoritmo di ordinamento stabile, molto efficiente in termini di letture di memoria, ideale per dati con range limitato e noto ma distribuzione sparsa.

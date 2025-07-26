@@ -28,7 +28,6 @@ private:
     void printTreeStructure(T_Node* node, std::string prefix = "", bool isLast = true);
     int getTreeHeight(T_Node* node);
     int countNodes(T_Node* node);
-    void writeDotHelper(T_Node* node, std::ofstream& file);
     void writeDotNodesHelper(T_Node* node, std::ofstream& file);
     void writeDotEdgesHelper(T_Node* node, std::ofstream& file);
     //Funzioni consegna.
@@ -292,11 +291,6 @@ void B_Tree::writeDotEdgesHelper(T_Node* node, std::ofstream& file) {
     // Visita ricorsivamente i figli
     writeDotEdgesHelper(node->left, file);
     writeDotEdgesHelper(node->right, file);
-}
-
-// Funzione helper per scrivere i nodi e gli archi nel file DOT (mantenuta per compatibilità)
-void B_Tree::writeDotHelper(T_Node* node, std::ofstream& file) {
-    // Non più utilizzata, ma mantenuta per evitare errori
 }
 
 // Funzione per generare il file DOT

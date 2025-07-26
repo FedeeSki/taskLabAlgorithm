@@ -1,6 +1,6 @@
 # Consegna 4
 
-Estendere il codice di base di shortest path, sostituendo la gestione per l'estrazione del minimo nodo (attualmente con un ciclo O ( n ) ), con l'heap utilizzato nelle lezioni precedenti (lezione11-heap File).
+Estendere il codice di base di shortest path, sostituendo la gestione per l'estrazione del minimo nodo (attualmente con un ciclo O ( n ) ), con l'heap utilizzato nelle lezioni precedenti (lezione11-heap File, parto da questo codice).
 
 Il punto di attenzione principale e' di garantire la complessita' log ( n )  e di recuperare correttamente l'indice dell'array dell'heap a partire dal codice del nodo (ad esempio nella decrease_key).
 

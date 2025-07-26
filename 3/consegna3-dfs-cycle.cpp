@@ -61,13 +61,13 @@ void addEdge(Graph* graph, int src, int dest) {
 //         if (visited[i] == 0) {
 //             if (isCyclicUtil(i, graph, visited)) {
 //                 delete[] visited;
-//                 return true; // Ciclo trovato
+//                 return true; 
 //             }
 //         }
 //     }
 
 //     delete[] visited;
-//     return false; // Nessun ciclo trovato
+//     return false; 
 // }
 
 //////////////// FUNZIONI PER GRAFO ////////////////////////////////////////

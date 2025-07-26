@@ -75,3 +75,125 @@ Questa è la logica centrale dell'algoritmo, implementata nella funzione ricorsi
 
 * **Gestione Manuale**: Per rispettare il vincolo di non usare la STL, la memoria è gestita manualmente con `new` e `delete[]`.
 * **Proprietà della Memoria**: L'algoritmo segue un pattern in cui la funzione `findLongestCycle` alloca memoria per `longest_cycle_nodes`, ma la responsabilità di deallocarla è lasciata al chiamante (`main`). Questo approccio è funzionale ma richiede attenzione per evitare memory leak. In C++ moderno, si preferirebbe usare contenitori RAII (come `std::vector`) che gestiscono la memoria automaticamente.
+
+## Confronto tra DFS Ricorsiva (approccio usato) e Algoritmo di Tarjan
+
+### 1. Approccio usato: DFS Ricorsiva con Array Percorso
+
+Nel codice sviluppato, la ricerca del ciclo più lungo si basa su una DFS ricorsiva che tiene traccia del percorso corrente tramite un array (`path[]`) e una variabile di lunghezza (`path_len`).
+Quando durante la visita si incontra un nodo già "in corso di visita" (`visited[v] == 1`), significa che è stato trovato un ciclo:
+
+- Si cerca la posizione di quel nodo nell’array `path[]` e da lì si ricostruisce il ciclo.
+- Se il ciclo è più lungo di quelli trovati in precedenza, si aggiorna la lunghezza massima e si salvano i nodi.
+
+**Esempio dal codice:**
+
+```cpp
+if (visited[v] == 1) { // Trovato un ciclo
+    int cycle_start_index = -1;
+    for (int i = 0; i < path_len; ++i) {
+        if (path[i] == v) {
+            cycle_start_index = i;
+            break;
+        }
+    }
+    // Calcola lunghezza e salva nodi del ciclo
+}
+```
+
+**Caratteristiche:**
+
+- Semplice da implementare.
+- Trova il ciclo più lungo, ma non tutte le componenti fortemente connesse (SCC).
+- Non usa uno stack esplicito, ma un array percorso.
+
+---
+
+### 2. Algoritmo di Tarjan (SCC)
+
+L’algoritmo di Tarjan trova tutte le componenti fortemente connesse (SCC) di un grafo orientato in tempo lineare.
+Utilizza:
+
+- Uno stack esplicito per tenere traccia dei nodi attualmente nel percorso DFS.
+- Low-link values per identificare i punti di inizio delle SCC.
+- Quando trova una SCC, estrae tutti i nodi dallo stack fino al nodo di partenza della SCC.
+
+**Schema semplificato:**
+```cpp
+void tarjan(int u) {
+    index[u] = lowlink[u] = ++time;
+    stack.push(u);
+    onStack[u] = true;
+    for (v : adj[u]) {
+        if (index[v] == -1) {
+            tarjan(v);
+            lowlink[u] = min(lowlink[u], lowlink[v]);
+        } else if (onStack[v]) {
+            lowlink[u] = min(lowlink[u], index[v]);
+        }
+    }
+    if (lowlink[u] == index[u]) {
+        // Estrai SCC dallo stack
+    }
+}
+```
+
+**Caratteristiche:**
+
+- Trova tutte le SCC (ogni ciclo è una SCC, ma non tutte le SCC sono cicli semplici).
+- Usa uno stack esplicito e valori low-link.
+- Più complesso, ma più potente per l’analisi strutturale dei grafi.
+
+---
+
+### Differenze principali
+
+| Aspetto                | DFS Ricorsiva (tuo)         | Tarjan (SCC)                |
+|------------------------|-----------------------------|-----------------------------|
+| Obiettivo              | Ciclo più lungo             | Tutte le SCC                |
+| Stack esplicito        | No (usa array percorso)     | Sì                          |
+| Low-link               | No                          | Sì                          |
+| Complessità            | Più semplice                | Più complesso               |
+| Output                 | Un ciclo (il più lungo)     | Tutte le SCC                |
+| Applicazione tipica    | Cicli semplici              | Analisi strutturale, SCC    |
+
+---
+
+### Quando usare uno o l’altro?
+
+- **DFS ricorsiva con array percorso**: se vuoi solo sapere se esistono cicli o trovare il ciclo più lungo, questo approccio è semplice ed efficace.
+- **Tarjan**: se vuoi trovare tutte le componenti fortemente connesse (ad esempio, per analizzare la struttura globale del grafo), Tarjan è la scelta giusta.
+
+**In sintesi:**
+L’approccio usato è perfetto per il problema richiesto dalla consegna (ciclo più lungo). Se dovessi estendere il lavoro all’analisi delle SCC, dovresti implementare Tarjan con stack esplicito e low-link.
+
+
+
+## Approfondimento: Algoritmo di Ford-Fulkerson (Flusso Massimo)
+
+L'algoritmo di Ford-Fulkerson è una tecnica fondamentale per risolvere il problema del **max flow** in una rete (grafo orientato con capacità sugli archi). L'obiettivo è trovare la massima quantità di "flusso" che può essere inviata da una sorgente a un pozzo senza superare la capacità degli archi.
+
+### Come funziona
+- Si parte con flusso nullo.
+- Si cerca un **cammino aumentante** dalla sorgente al pozzo (usando DFS o BFS) lungo il quale è possibile aumentare il flusso.
+- Si aumenta il flusso lungo questo cammino della quantità massima possibile (bottleneck).
+- Si aggiorna la rete residua e si ripete finché non esistono più cammini aumentanti.
+
+**Pseudocodice semplificato:**
+```cpp
+while (esiste cammino aumentante da S a T nella rete residua) {
+    aumenta il flusso lungo il cammino;
+    aggiorna la rete residua;
+}
+```
+
+### Applicazioni
+- Problemi di trasporto, reti di comunicazione, matching bipartito, pianificazione di risorse.
+
+### Confronto con altri algoritmi
+- **DFS/BFS**: Ford-Fulkerson usa DFS/BFS come sottoprocedura per trovare cammini aumentanti, ma il suo obiettivo è ottimizzare il flusso, non solo visitare nodi o trovare cicli.
+- **Kruskal/Prim (MST)**: Questi algoritmi cercano alberi di copertura a peso minimo, mentre Ford-Fulkerson lavora su capacità e flussi, non su pesi minimi.
+- **Tarjan/DFS per cicli**: Questi algoritmi analizzano la struttura dei cicli o delle componenti, Ford-Fulkerson invece trasforma la struttura del grafo per ottimizzare un valore globale (il flusso).
+
+### Sintesi
+Ford-Fulkerson mostra come la visita di un grafo (DFS/BFS) possa essere usata in modo avanzato per risolvere problemi di ottimizzazione, diversi dalla semplice esplorazione o dalla ricerca di cicli. È un esempio di come la teoria dei grafi si applichi a problemi pratici di rete e risorse.
