@@ -1,7 +1,7 @@
 #include <iostream>
 #include <cstdio>   
 
-// --- FUNZIONI DI UTILITÀ PER I CARATTERI (sostituiscono <cctype>) ---
+// --- FUNZIONI DI UTILITÀ PER I CARATTERI (tipo quelli di <cctype>) ---
 
 bool my_isspace(char c) {
     return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f' || c == '\v';
@@ -29,7 +29,7 @@ private:
     int len;
     int cap; // Capacità, per rendere push_back efficiente
 
-    // Metodi "furbi" per non usare <cstring>
+   
     int custom_strlen(const char* s) const {
         int length = 0;
         while (s[length] != '\0') {
@@ -59,7 +59,6 @@ private:
     }
 
 public:
-    // Costruttore di default
     String() : data(new char[1]), len(0), cap(1) {
         data[0] = '\0';
     }
@@ -96,18 +95,32 @@ public:
     }
 
     // Aggiunge un carattere alla fine della stringa
+
     void push_back(char ch) {
-        if (len == cap) {
-            cap = (cap == 0) ? 1 : cap * 2;
-            char* newData = new char[cap + 1];
-            custom_strcpy(newData, data);
-            delete[] data;
-            data = newData;
-        }
-        data[len] = ch;
-        len++;
-        data[len] = '\0';
+    // Se la lunghezza ha raggiunto la capacità attuale, è necessario riallocare più memoria
+    if (len == cap) {
+
+        // Se cap == 0, inizializzarla a 1; altrimenti *2 (esponenziale crescita)
+        cap = (cap == 0) ? 1 : cap * 2;
+
+        // Alloca un nuovo array con la nuova capacità +1 per il terminatore null
+        char* newData = new char[cap + 1];
+        custom_strcpy(newData, data); // copy data in new dda
+         
+        delete[] data; // delete mem precedente
+        
+        data = newData; // update pointer ai dati new
     }
+
+    // add il carattere alla fine della stringa
+    data[len] = ch;
+
+    // Incrementa la lunghezza della stringa
+    len++;
+
+    data[len] = '\0'; // Aggiunge il terminatore null 
+}
+
 
     const char* c_str() const { return data; }
     int size() const { return len; }
@@ -161,6 +174,7 @@ public:
 
 
     void push_back(const T& value) {
+        //logica simil alla stringa
         if (current_size == current_capacity) {
             int new_capacity = (current_capacity == 0) ? 1 : current_capacity * 2;
             T* new_data = new T[new_capacity];
@@ -213,12 +227,10 @@ bool is_keyword(const String& s) {
         "try", "typedef", "typeid", "typename", "union", "unsigned", "using",
         "virtual", "void", "volatile", "wchar_t", "while", "xor", "xor_eq"
     };
-    int num_keywords = sizeof(keywords) / sizeof(keywords[0]);
+    int num_keywords = sizeof(keywords) / sizeof(keywords[0]); //keyw in array
     for (int i = 0; i < num_keywords; ++i) {
-        // CORREZIONE: Usa l'operatore pubblico '==' invece di un metodo privato.
-        // Questo è più pulito e rispetta l'incapsulamento.
         if (s == String(keywords[i])) {
-            return true;
+            return true; // è una keyword
         }
     }
     return false;
@@ -226,7 +238,7 @@ bool is_keyword(const String& s) {
 
 struct Token {
     TokenType type;
-    String text; // Ora usiamo la nostra classe String
+    String text; 
 };
 
 Vector<Token> tokenize(const char* filename) {
@@ -239,39 +251,45 @@ Vector<Token> tokenize(const char* filename) {
 
     int c;
     while ((c = fgetc(file)) != EOF) {
-        if (my_isspace(c)) {
+        if (my_isspace(c)) { // ignoro white space , tab , nline
             continue;
         }
-        // Identificatori e parole chiave
+        // Identificatori e parole chiave (lettara o _ )
         if (my_isalpha(c) || c == '_') {
             String current_text;
             current_text.push_back(c);
-            while ((c = fgetc(file)) != EOF && (my_isalnum(c) || c == '_')) {
+
+            while ((c = fgetc(file)) != EOF && (my_isalnum(c) || c == '_')) { //continua finche lettere cifre o _
                 current_text.push_back(c);
             }
-            //se abbiamo letto un carattere in più, lo ignoriamo (tokenizzazione semplice)
-            TokenType type = is_keyword(current_text) ? KEYWORD : IDENTIFIER;
+            //se abbiamo letto un carattere in più, lo ignoriamo
+
+            TokenType type = is_keyword(current_text) ? KEYWORD : IDENTIFIER; //keyword
             Token t = {type, current_text};
             tokens.push_back(t);
-            if (c == EOF) break;
+
+            if (c == EOF) break; // Se è stato letto un carattere in più (non valido), verrà processato nel prossimo ciclo
         }
-        // Numeri
-        else if (my_isdigit(c)) {
+        
+        else if (my_isdigit(c)) {  // num interi
             String current_text;
             current_text.push_back(c);
-            while ((c = fgetc(file)) != EOF && my_isdigit(c)) {
+
+            while ((c = fgetc(file)) != EOF && my_isdigit(c)) { // continua a leggere finche trova cifre
                 current_text.push_back(c);
             }
             Token t = {NUMBER, current_text};
             tokens.push_back(t);
+
             if (c == EOF) break;
         }
-        // Simboli singoli (qualsiasi altro carattere)
-        else {
+        
+        else { //simboli e qualsiasi altro carattere
             String text;
             text.push_back(c);
-            TokenType type;
-            const char* s = text.c_str();
+
+            TokenType type;   // strutturale o operatore
+            const char* s = text.c_str(); 
             if (s[0] == '{' || s[0] == '}' || s[0] == '(' || s[0] == ')' || s[0] == '[' || s[0] == ']' || s[0] == ';') {
                 type = SYMBOL;
             } else {
@@ -281,37 +299,40 @@ Vector<Token> tokenize(const char* filename) {
             tokens.push_back(t);
         }
     }
-    fclose(file);
-    return tokens;
+    fclose(file); 
+    return tokens; //vector token estratti
 }
 
 // --- FASE 2: SISTEMA DI PUNTEGGIO ---
 
-// Definisce i punteggi e le penalità come costanti per una facile calibrazione.
+// Valori di punteggio per l'allineamento tra token (const per facile scoring)
 const int MATCH_STRUCTURAL_SCORE = 10; // { } ( ) ;
 const int MATCH_KEYWORD_SCORE = 5;     // if, for, while...
 const int MATCH_GENERIC_SCORE = 2;     // Nomi di variabili, numeri...
-const int MISMATCH_PENALTY = -2;
-const int GAP_PENALTY = -3;
+const int MISMATCH_PENALTY = -2; // token diversi
+
+//Viene usata per inizializzare la matrice e durante il calcolo dei 
+// punteggi di inserzione/cancellazione.
+const int GAP_PENALTY = -3;  
 
 int score(const Token& a, const Token& b) {
-    if (a.text == b.text) {
+    if (a.text == b.text) { // identici token
         if (a.type == SYMBOL) {
             return MATCH_STRUCTURAL_SCORE;
         }
         if (a.type == KEYWORD) {
             return MATCH_KEYWORD_SCORE;
         }
-        return MATCH_GENERIC_SCORE;
+        return MATCH_GENERIC_SCORE; // per IDENTIFIER, NUMBER, OPERATOR, ecc.
     }
-    return MISMATCH_PENALTY;
+    return MISMATCH_PENALTY; // penalita' fissa
 }
 
 
 // --- FASE 3: ALGORITMO DI NEEDLEMAN-WUNSCH ---
 
-// Funzione helper per trovare il massimo di tre interi
-int max3(int a, int b, int c) {
+// trovare il MAX di tre interi
+int max3(int a, int b, int c) { 
     int max_val = a;
     if (b > max_val) max_val = b;
     if (c > max_val) max_val = c;
@@ -323,8 +344,7 @@ void needlemanWunsch(const Vector<Token>& seq1, const Vector<Token>& seq2) {
     int m = seq2.size();
 
     // 1. Creazione e inizializzazione della matrice dei punteggi
-    // TO_DO: La nostra classe Vector non ha un costruttore (size, value),
-    // quindi dobbiamo costruire la matrice manualmente.
+    
     Vector<Vector<int>> matrix;
     for (int i = 0; i <= n; ++i) {
         Vector<int> row;

@@ -86,7 +86,7 @@ void count_opt_sort_bitmap(int *A, int p, int r) {
     unsigned char *bitmap = new unsigned char[bitmap_size]();
     int index = p;
 
-    // Fase 1: conteggio e aggiornamento bitmap
+    // 1 counting e aggiornamento bitmap
     for (int i = p; i <= r; i++) {
         ct_read++; // Lettura A[i]
         int val = A[i];
@@ -99,6 +99,7 @@ void count_opt_sort_bitmap(int *A, int p, int r) {
         int byte_idx = idx / 8;
         int bit_idx = idx % 8;
         ct_read++; // Lettura bitmap[byte_idx]
+
         // Operatore & (AND bit a bit): controlla se il bit in posizione bit_idx è già attivo (presenza del valore)
         if ((bitmap[byte_idx] & (1 << bit_idx)) == 0) {
             // Operatore | (OR bit a bit): attiva il bit in posizione bit_idx per segnare la presenza del valore
@@ -106,7 +107,7 @@ void count_opt_sort_bitmap(int *A, int p, int r) {
         }
     }
 
-    // Fase 2: scrittura valori ordinati
+    // 2 scrittura valori ordinati
     for (int byte_idx = 0; byte_idx < bitmap_size; byte_idx++) {
         ct_read++; // Lettura bitmap[byte_idx]
         unsigned char byte = bitmap[byte_idx];
@@ -222,7 +223,7 @@ int main(int argc, char **argv) {
             }
             return 1; 
         } else if (details) {
-            printf("✓ Array ordinato correttamente\n");
+            printf(" Array ordinato correttamente\n");
         }
 
         if (details) {

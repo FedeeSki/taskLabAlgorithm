@@ -1,11 +1,11 @@
 #include <iostream>
 #include <cstdlib>
 #include <ctime>
-#include <string>
+#include <string> // dot file
 #include <fstream>
 #include <cmath>  // per abs()
 
-// Struttura per un nodo dell'albero binario
+
 struct T_Node {
     int data;
     T_Node* left;
@@ -15,7 +15,7 @@ struct T_Node {
     T_Node(int value) : data(value), left(nullptr), right(nullptr) {}
 };
 
-// Classe per gestire l'albero binario
+
 class B_Tree {
 private:
     T_Node* root;
@@ -29,6 +29,7 @@ private:
     int getTreeHeight(T_Node* node);
     int countNodes(T_Node* node);
     void writeDotNodesHelper(T_Node* node, std::ofstream& file);
+
     void writeDotEdgesHelper(T_Node* node, std::ofstream& file);
     //Funzioni consegna.
     void flipTreeHelper(T_Node* node);
@@ -65,20 +66,20 @@ public:
     
     //////////////////////////////////////////////////////////////////////////////////////
 
-    // Funzione per flip dell'albero
+    // Funzione per flip dell'albero 1
     void flipTree();
     
-    // Funzione per calcolare e mostrare profondità nodi
+    // Funzione per calcolare e mostrare profondità nodi 2
     void printNodeDepths();
     
-    // Funzione per verificare se l'albero è bilanciato
+    // Funzione per verificare se l'albero è bilanciato 3
     bool isBalanced();
 
-    // Funzione isComplete => flag indica se albero è completo
+    // Funzione isComplete => flag indica se albero è completo 4
 
     bool isComplete();
 
-    // Funzione findLCA per trovare il Lowest Common Ancestor
+    // Funzione findLCA per trovare il Lowest Common Ancestor 5 
 
     int findLCA();
 
@@ -231,22 +232,20 @@ int B_Tree::countNodes(T_Node* node) {
 // Funzione per visualizzare l'albero in modo carino
 void B_Tree::display() {
     if (root == nullptr) {
-        std::cout << "┌─────────────────────────────────┐" << std::endl;
-        std::cout << "│        L'ALBERO È VUOTO         │" << std::endl;
-        std::cout << "└─────────────────────────────────┘" << std::endl;
+        std::cout << "====        L'ALBERO È VUOTO         ====" << std::endl;
         return;
     }
     
     int height = getTreeHeight(root);
     int nodeCount = countNodes(root);
     
-    std::cout << "\n╔══════════════════════════════════════════════════════╗" << std::endl;
-    std::cout << "                    ALBERO BINARIO                    " << std::endl;
+    std::cout << "\n=========================================================" << std::endl;
+    std::cout << "                    ALBERO BINARIO                       " << std::endl;
     std::cout << "   Altezza: " << height << "                             " << std::endl;
     std::cout << "   Numero nodi: " << nodeCount << "                      " << std::endl;
-    std::cout << "╚══════════════════════════════════════════════════════╝" << std::endl;
+    std::cout << "=========================================================" << std::endl;
     
-    std::cout << "\n🌳 STRUTTURA DELL'ALBERO:" << std::endl;
+    std::cout << "\n STRUTTURA DELL'ALBERO:" << std::endl;
     std::cout << "┌─ Radice" << std::endl;
     printTreeStructure(root);
     
@@ -298,7 +297,7 @@ void B_Tree::generateDotFile(const std::string& filename) {
     std::ofstream file(filename);
     
     if (!file.is_open()) {
-        std::cout << "❌ Errore nell'apertura del file: " << filename << std::endl;
+        std::cout << " Errore nell'apertura del file: " << filename << std::endl;
         return;
     }
     
@@ -331,16 +330,16 @@ void B_Tree::generateDotFile(const std::string& filename) {
     file << "}" << std::endl;
     file.close();
     
-    std::cout << "\n📁 File DOT generato: " << filename << std::endl;
-    std::cout << "💡 Per visualizzare l'albero graficamente, usa:" << std::endl;
+    std::cout << "\n File DOT generato: " << filename << std::endl;
+    std::cout << " Per visualizzare l'albero graficamente, usa:" << std::endl;
     std::cout << "   dot -Tpng " << filename << " -o albero.png" << std::endl;
     std::cout << "   (richiede Graphviz installato)" << std::endl;
 }
 
-//FUNZIONI PER CONSEGNA
+// ================================== FUNZIONI PER CONSEGNA ==========================================0
 
 
-// Funzione helper per flip dell'albero 1° Consegna
+// Funzione helper per flip dell'albero 
 void B_Tree::flipTreeHelper(T_Node* node) {
     if (node == nullptr) {
         return;
@@ -359,16 +358,16 @@ void B_Tree::flipTreeHelper(T_Node* node) {
 // Funzione pubblica per flip dell'albero
 void B_Tree::flipTree() {
     if (root == nullptr) {
-        std::cout << "❌ Impossibile fare flip: l'albero è vuoto!" << std::endl;
+        std::cout << " Impossibile fare flip: l'albero è vuoto!" << std::endl;
         return;
     }
     
-    std::cout << "🔄 Eseguendo flip dell'albero..." << std::endl;
+    std::cout << " Eseguendo flip dell'albero..." << std::endl;
     flipTreeHelper(root);
-    std::cout << "✅ Flip completato! Ogni sottoalbero sinistro è diventato destro e viceversa." << std::endl;
+    std::cout << " Flip completato! Ogni sottoalbero sinistro è diventato destro e viceversa." << std::endl;
 }
 
-// Funzione helper per calcolare e stampare la profondità di ogni nodo 2° Consegna
+// Funzione helper per calcolare e stampare la profondità di ogni nodo 
 void B_Tree::printNodeDepthsHelper(T_Node* node, int currentDepth) {
     if (node == nullptr) {
         return;
@@ -385,14 +384,14 @@ void B_Tree::printNodeDepthsHelper(T_Node* node, int currentDepth) {
 // Funzione pubblica per calcolare e mostrare la profondità di tutti i nodi
 void B_Tree::printNodeDepths() {
     if (root == nullptr) {
-        std::cout << "❌ Impossibile calcolare profondità: l'albero è vuoto!" << std::endl;
+        std::cout << " Impossibile calcolare profondità: l'albero è vuoto!" << std::endl;
         return;
     }
     
-    std::cout << "📏 Calcolando profondità di ogni nodo..." << std::endl;
+    std::cout << " Calcolando profondità di ogni nodo..." << std::endl;
     std::cout << "┌─ Profondità nodi (radice = 0):" << std::endl;
     printNodeDepthsHelper(root, 0);
-    std::cout << "✅ Calcolo profondità completato!" << std::endl;
+    std::cout << " Calcolo profondità completato!" << std::endl;
 }
 
 // Funzione helper per verificare se l'albero è bilanciato O(n)
@@ -427,20 +426,20 @@ int B_Tree::isBalancedHelper(T_Node* node) {
 // Funzione pubblica per verificare se l'albero è bilanciato
 bool B_Tree::isBalanced() {
     if (root == nullptr) {
-        std::cout << "🌿 Albero vuoto: considerato bilanciato per definizione." << std::endl;
+        std::cout << " Albero vuoto: considerato bilanciato per definizione." << std::endl;
         return true;
     }
     
-    std::cout << "⚖️  Verificando se l'albero è bilanciato..." << std::endl;
+    std::cout << " Verificando se l'albero è bilanciato..." << std::endl;
     
     int result = isBalancedHelper(root);
     bool balanced = (result != -1);
     
     if (balanced) {
-        std::cout << "✅ L'albero È BILANCIATO! (altezza: " << result << ")" << std::endl;
+        std::cout << " L'albero È BILANCIATO! (altezza: " << result << ")" << std::endl;
         std::cout << "   Per ogni nodo, la differenza di altezza tra sottoalberi ≤ 1" << std::endl;
     } else {
-        std::cout << "❌ L'albero NON è bilanciato!" << std::endl;
+        std::cout << " L'albero NON è bilanciato!" << std::endl;
         std::cout << "   Esiste almeno un nodo con differenza di altezza > 1" << std::endl;
     }
     
@@ -468,11 +467,11 @@ bool B_Tree::isCompleteHelper(T_Node* node, int index, int nodeCount) {
 // Funzione pubblica per verificare se l'albero è completo
 bool B_Tree::isComplete() {
     if (root == nullptr) {
-        std::cout << "🌿 Albero vuoto: considerato completo per definizione." << std::endl;
+        std::cout << " Albero vuoto: considerato completo per definizione." << std::endl;
         return true;
     }
     
-    std::cout << "🔍 Verificando se l'albero è completo..." << std::endl;
+    std::cout << " Verificando se l'albero è completo..." << std::endl;
     
     // Conta il numero totale di nodi
     int nodeCount = countNodes(root);
@@ -481,11 +480,11 @@ bool B_Tree::isComplete() {
     bool complete = isCompleteHelper(root, 0, nodeCount);
     
     if (complete) {
-        std::cout << "✅ L'albero È COMPLETO!" << std::endl;
+        std::cout << " L'albero È COMPLETO!" << std::endl;
         std::cout << "   Tutti i livelli sono pieni eccetto possibilmente l'ultimo," << std::endl;
         std::cout << "   che è riempito da sinistra a destra. (Nodi: " << nodeCount << ")" << std::endl;
     } else {
-        std::cout << "❌ L'albero NON è completo!" << std::endl;
+        std::cout << " L'albero NON è completo!" << std::endl;
         std::cout << "   Esistono dei \"buchi\" nella struttura dell'albero." << std::endl;
         std::cout << "   I nodi non seguono l'ordine di riempimento da sinistra a destra." << std::endl;
     }
@@ -522,7 +521,7 @@ bool B_Tree::findPath(T_Node* node, T_Node** path, int& pathLength, int target) 
 
 // Funzione helper per trovare LCA usando l'approccio path-based
 T_Node* B_Tree::findLCAHelper(int value1, int value2) {
-    // Array per memorizzare i percorsi (assumiamo altezza massima 100)
+    // Array per memorizzare i percorsi (assumo altezza massima 100)
     const int MAX_NODES = 100;
     T_Node* path1[MAX_NODES];
     T_Node* path2[MAX_NODES];
@@ -555,146 +554,145 @@ T_Node* B_Tree::findLCAHelper(int value1, int value2) {
 // Funzione pubblica per trovare il Lowest Common Ancestor
 int B_Tree::findLCA() {
     if (root == nullptr) {
-        std::cout << "❌ Impossibile trovare LCA: l'albero è vuoto!" << std::endl;
+        std::cout << " Impossibile trovare LCA: l'albero è vuoto!" << std::endl;
         return -1;
     }
     
     int value1, value2;
-    std::cout << "🔸 Inserisci il primo valore: ";
+    std::cout << " Inserisci il primo valore: ";
     std::cin >> value1;
-    std::cout << "🔸 Inserisci il secondo valore: ";
+    std::cout << " Inserisci il secondo valore: ";
     std::cin >> value2;
     
     if (value1 == value2) {
-        std::cout << "💡 I due valori sono uguali. LCA = " << value1 << std::endl;
+        std::cout << " I due valori sono uguali. LCA = " << value1 << std::endl;
         return value1;
     }
     
-    std::cout << "🔍 Cercando il Lowest Common Ancestor di " << value1 << " e " << value2 << "..." << std::endl;
+    std::cout << " Cercando il Lowest Common Ancestor di " << value1 << " e " << value2 << "..." << std::endl;
     
     T_Node* lcaNode = findLCAHelper(value1, value2);
     
     if (lcaNode != nullptr) {
-        std::cout << "✅ LCA trovato: " << lcaNode->data << std::endl;
+        std::cout << " LCA trovato: " << lcaNode->data << std::endl;
         std::cout << "   Il nodo " << lcaNode->data << " è l'antenato comune più basso" << std::endl;
         std::cout << "   che contiene entrambi i valori " << value1 << " e " << value2 << " nel suo sottoalbero." << std::endl;
         return lcaNode->data;
     } else {
-        std::cout << "❌ Uno o entrambi i valori non sono presenti nell'albero!" << std::endl;
+        std::cout << " Uno o entrambi i valori non sono presenti nell'albero!" << std::endl;
         return -1;
     }
 }
 
-// Funzione main
+
 int main() {
     B_Tree tree;
     int choice;
     
-    std::cout << "╔══════════════════════════════════════════════════════╗" << std::endl;
-    std::cout << "║               GENERATORE ALBERO BINARIO              ║" << std::endl;
-    std::cout << "╠══════════════════════════════════════════════════════╣" << std::endl;
-    std::cout << "║  1. 📝 Inserimento manuale                           ║" << std::endl;
-    std::cout << "║  2. 🎲 Generazione casuale                           ║" << std::endl;
-    std::cout << "╚══════════════════════════════════════════════════════╝" << std::endl;
-    std::cout << "🔸 Scelta: ";
+    std::cout << "==========================================================" << std::endl;
+    std::cout << "                GENERATORE ALBERO BINARIO                 " << std::endl;
+    std::cout << "==========================================================" << std::endl;
+    std::cout << "  1.  Inserimento manuale                           " << std::endl;
+    std::cout << "  2.  Generazione casuale                          " << std::endl;  //ha piccoli bug per grafi grandi causa valori doppi
+    std::cout << "==========================================================" << std::endl;
+    std::cout << " Scelta: ";
     std::cin >> choice;
     
     if (choice == 1) {
-        std::cout << "\n📝 MODALITÀ INSERIMENTO MANUALE" << std::endl;
-        std::cout << "💡 Suggerimento: inserisci -1 per indicare un nodo vuoto\n" << std::endl;
+        std::cout << "\n MODALITÀ INSERIMENTO MANUALE" << std::endl;
+        std::cout << "Suggerimento: inserisci -1 per indicare un nodo vuoto\n" << std::endl;
         tree.readTreeFromInput();
     } else if (choice == 2) {
         int maxDepth, minValue, maxValue;
         
-        std::cout << "\n🎲 MODALITÀ GENERAZIONE CASUALE" << std::endl;
-        std::cout << "🔸 Inserisci profondità massima dell'albero: ";
+        std::cout << "\n MODALITÀ GENERAZIONE CASUALE" << std::endl;
+        std::cout << " Inserisci profondità massima dell'albero: ";
         std::cin >> maxDepth;
         
-        std::cout << "🔸 Inserisci valore minimo: ";
+        std::cout << " Inserisci valore minimo: ";
         std::cin >> minValue;
         
-        std::cout << "🔸 Inserisci valore massimo: ";
+        std::cout << " Inserisci valore massimo: ";
         std::cin >> maxValue;
         
-        std::cout << "\n⚙️  Generazione in corso..." << std::endl;
+        std::cout << "\n Generazione in corso..." << std::endl;
         tree.generateRandomTree(maxDepth, minValue, maxValue);
-        std::cout << "✅ Albero generato con successo!" << std::endl;
+        std::cout << " Albero generato con successo!" << std::endl;
     } else {
-        std::cout << "❌ Scelta non valida!" << std::endl;
+        std::cout << " Scelta non valida!" << std::endl;
         return 1;
     }
     
-    // Visualizza l'albero
     tree.display();
     
-    // Loop principale per le operazioni
+    
+
     while (true) {
-        std::cout << "\n╔══════════════════════════════════════════════════════╗" << std::endl;
-        std::cout << "║                   OPERAZIONI ALBERO                  ║" << std::endl;
-        std::cout << "╠══════════════════════════════════════════════════════╣" << std::endl;
-        std::cout << "║  1. 🔄 Flip albero (scambia sottoalberi sx/dx)       ║" << std::endl;
-        std::cout << "║  2. 📏 Calcola profondità nodi                       ║" << std::endl;
-        std::cout << "║  3. ⚖️  Verifica se albero è bilanciato              ║" << std::endl;
-        std::cout << "║  6. C  Verifica se albero è Completo                 ║" << std::endl;
-        std::cout << "║  7. 🎯LCA trova LCA di 2 valori (nodi)               ║" << std::endl;
-        std::cout << "║  4. 📊 Mostra albero                                 ║" << std::endl;
-        std::cout << "║  5. 🎨 Genera file DOT                               ║" << std::endl;
-        std::cout << "║  q. ❌ Esci                                          ║" << std::endl;
-        std::cout << "╚══════════════════════════════════════════════════════╝" << std::endl;
-        std::cout << "🔸 Scelta: ";
+        std::cout << "\n =========================================================="<< std::endl;
+        std::cout << "                   OPERAZIONI ALBERO                  " << std::endl;
+        std::cout << "==========================================================" << std::endl;
+        std::cout << "  1.  Flip albero (scambia sottoalberi sx/dx)         " << std::endl;
+        std::cout << "  2.  Calcola profondità nodi                         " << std::endl;
+        std::cout << "  3.  Verifica se albero è bilanciato                 " << std::endl;
+        std::cout << "  4.  Mostra albero                                   " << std::endl;
+        std::cout << "  5.  Genera file DOT                                 " << std::endl;
+        std::cout << "  6.  Verifica se albero è Completo                   " << std::endl;
+        std::cout << "  7.  LCA trova LCA di 2 valori (nodi)                " << std::endl;
+        std::cout << "  q.  Esci                                            " << std::endl;
+        std::cout << "Scelta: ";
         
         char operation;
         std::cin >> operation;
         
         if (operation == 'q' || operation == 'Q') {
-            std::cout << "👋 cya!" << std::endl;
+            std::cout << " cya!" << std::endl;
             break;
         }
         
         switch (operation) {
             case '1':
-                std::cout << "\n📊 ALBERO PRIMA DEL FLIP:" << std::endl;
+                std::cout << "\n ALBERO PRIMA DEL FLIP:" << std::endl;
                 tree.display();
                 
                 tree.flipTree();
                 
-                std::cout << "\n📊 ALBERO DOPO IL FLIP:" << std::endl;
+                std::cout << "\n  ALBERO DOPO IL FLIP:" << std::endl;
                 tree.display();
                 break;
                 
             case '2':
-                std::cout << "\n📏 PROFONDITÀ NODI:" << std::endl;
+                std::cout << "\n PROFONDITÀ NODI:" << std::endl;
                 tree.printNodeDepths();
                 break;
                 
             case '3':
-                std::cout << "\n⚖️  VERIFICA BILANCIAMENTO:" << std::endl;
+                std::cout << "\n VERIFICA BILANCIAMENTO:" << std::endl;
                 tree.isBalanced();
                 break;
 
             case '6':
-                std::cout << "\nC  VERIFICA COMPLETEZZA:" << std::endl;
+                std::cout << "\n VERIFICA COMPLETEZZA:" << std::endl;
                 tree.isComplete();
                 break;
 
             case '7':
-                std::cout << "\n🎯  RICERCA LCA:" << std::endl;
+                std::cout << "\n  RICERCA LCA:" << std::endl;
                 tree.findLCA();
                 break;
 
             case '4':
-                std::cout << "\n📊 ALBERO CORRENTE:" << std::endl;
+                std::cout << "\n ALBERO CORRENTE:" << std::endl;
                 tree.display();
                 break;
                 
             case '5': {
-                std::cout << "\n🎨 Generazione file DOT..." << std::endl;
+                std::cout << "\n Generazione file DOT..." << std::endl;
                 tree.generateDotFile("albero.dot");
                 break;
             }
             
             default:
-                std::cout << "❌ Scelta non valida! Usa 1, 2, 3, 4, 5, 6, 7 o 'q' per uscire." << std::endl;
+                std::cout << " Scelta non valida! Usa 1, 2, 3, 4, 5, 6, 7 o 'q' per uscire." << std::endl;
                 break;
         }
     }

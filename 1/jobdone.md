@@ -205,6 +205,7 @@ Per ogni elemento:
 L'uso della bitmap nella versione ottimizzata di counting sort permette di evitare la scansione completa di tutto il range di valori possibili durante la fase di scrittura. Invece di leggere il contatore di ogni valore da 0 a 10500 (anche per valori mai presenti), la bitmap consente di saltare direttamente ai soli valori effettivamente presenti nell'array. Questo riduce drasticamente il numero di letture in memoria, che è l'obiettivo principale della consegna.
 
 **In sintesi:**
+
 - La bitmap è un array di bit, dove ogni bit rappresenta la presenza o assenza di un valore nel range.
 - Durante la fase di conteggio, per ogni valore incontrato si aggiorna sia il contatore che il bit corrispondente nella bitmap.
 - Durante la fase di scrittura, si scorre solo la bitmap: per ogni bit attivo si legge il contatore e si scrive il valore nell'array ordinato.

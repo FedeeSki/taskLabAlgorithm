@@ -72,7 +72,7 @@ struct Graph {
 };
 
 // Struttura per i sottoinsiemi utilizzati nella DSU (Disjoint Set Union)
-// Questa struttura è essenziale per rilevare i cicli.
+// fonamentale per rilevare i cicli.
 struct Subset {
     int parent;
     int rank; // Il "rank" aiuta a mantenere l'albero piatto durante l'unione
@@ -103,6 +103,7 @@ void addEdge(Graph* graph, int src, int dest, int weight) {
 
 // Trova il rappresentante dell'insieme a cui appartiene 'i' (con path compression)
 // La path compression ottimizza le ricerche future rendendo l'albero più piatto.
+
 int find(Subset subsets[], int i) {
     if (subsets[i].parent != i) {
         // Se 'i' non è il genitore di se stesso, allora non è il rappresentante.
@@ -133,7 +134,7 @@ void Union(Subset subsets[], int x, int y) {
 
 //////////////// ALGORITMO DI KRUSKAL //////////////////////////////////////
 
-// Funzione per scambiare due archi (necessaria per QuickSort)
+// Funzione per scambiare due archi (per QuickSort)
 void swapEdges(Edge* a, Edge* b) {
     Edge t = *a;
     *a = *b;
@@ -141,9 +142,9 @@ void swapEdges(Edge* a, Edge* b) {
 }
 
 // Funzione di partizione per l'algoritmo QuickSort.
-// Prende l'ultimo elemento come pivot e lo posiziona nella sua posizione corretta.
+// (Prende l'ultimo elemento come pivot e lo posiziona nella sua posizione corretta)
 int partition(Edge arr[], int low, int high) {
-    int pivot_weight = arr[high].weight; // Pivot
+    int pivot_weight = arr[high].weight; 
     int i = (low - 1); // Indice dell'elemento più piccolo
 
     for (int j = low; j <= high - 1; j++) {
@@ -171,7 +172,7 @@ void quickSort(Edge arr[], int low, int high) {
 
 // Funzione per stampare i cluster (componenti connesse)
 void printClusters(Subset subsets[], int V, const CustomMap& node_map_inv) {
-    // Questo approccio è O(V^2) ma non richiede strutture dati complesse.
+    // Questo approccio è O(V^2) ma non richiede strutture dati complesse
     // Itera su ogni potenziale radice.
     for (int i = 0; i < V; ++i) {
         // Se 'i' è il genitore di se stesso, allora è il rappresentante di un cluster.
@@ -262,7 +263,7 @@ void kruskalMST(Graph* graph, const CustomMap& node_map_inv) {
     // 2. Alloca memoria per i sottoinsiemi della DSU
     Subset* subsets = new Subset[V];
     for (int v = 0; v < V; ++v) {
-        subsets[v].parent = v; // Ogni vertice è inizialmente genitore di se stesso
+        subsets[v].parent = v; // Ogni vertice è inizialmente genitore di se stesso (bottom-up CLUSTERING)
         subsets[v].rank = 0;
     }
 
@@ -363,17 +364,17 @@ Graph* loadGraphFromFile(const char* filename, CustomMap& node_map, CustomMap& n
 // Funzione per deallocare la memoria del grafo
 void destroyGraph(Graph* graph) {
     if (graph != nullptr) {
-        delete[] graph->edges; // Libera la memoria degli archi
+        delete[] graph->edges; 
         delete graph;
     }
 }
 
-// Funzione main per testare il codice
+
 int main() {
     const char* filename = "deepseek_DATASET_graphBOLOGNA.txt";
     CustomMap node_map; // Mappa da ID originali a indici 0..V-1
     CustomMap node_map_inv; // Mappa inversa da indici a ID originali
-    map_init(&node_map, 2000); // Scegli una capacità massima ragionevole
+    map_init(&node_map, 2000); 
     map_init(&node_map_inv, 2000);
 
     Graph* graph = loadGraphFromFile(filename, node_map, node_map_inv);
@@ -381,13 +382,15 @@ int main() {
     if (graph == nullptr) {
         map_free(&node_map);
         map_free(&node_map_inv);
-        return 1; // Errore nel caricamento del file
+        return 1; // ERROR!
     }
 
-    // Applica l'algoritmo di Kruskal
+    
+
     kruskalMST(graph, node_map_inv);
 
-    // Libera la memoria
+    
+
     destroyGraph(graph);
     map_free(&node_map);
     map_free(&node_map_inv);

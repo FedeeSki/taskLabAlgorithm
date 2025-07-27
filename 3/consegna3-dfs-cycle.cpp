@@ -1,12 +1,12 @@
 #include <iostream>
 
-// Struttura per un nodo della lista di adiacenza
+
 struct AdjListNode {
     int dest;
     AdjListNode* next;
 };
 
-// Struttura per rappresentare il grafo
+
 struct Graph {
     int V; // Numero di vertici
     AdjListNode** adj; // Array di puntatori alle liste di adiacenza
@@ -70,9 +70,9 @@ void addEdge(Graph* graph, int src, int dest) {
 //     return false; 
 // }
 
-//////////////// FUNZIONI PER GRAFO ////////////////////////////////////////
 
 // Sub-routine ricorsiva per la DFS che trova il ciclo più lungo
+
 void findLongestCycleUtil(int u, Graph* graph, int* visited, int* path, int& path_len, int& max_cycle_len, int*& longest_cycle_nodes) {
     visited[u] = 1; // Marca il nodo come "in corso di visita"
     path[path_len++] = u; // Aggiunge il nodo al percorso corrente
@@ -115,7 +115,7 @@ void findLongestCycleUtil(int u, Graph* graph, int* visited, int* path, int& pat
     path_len--; // Rimuove il nodo dal percorso corrente
 }
 
-// Funzione principale per trovare il ciclo più lungo in un grafo
+// Funzione principale per trovare il ciclo più lungo in un grafo DFS longest cycle
 int findLongestCycle(Graph* graph, int*& longest_cycle_nodes) {
     if (graph == nullptr) return 0;
 
@@ -142,7 +142,7 @@ int findLongestCycle(Graph* graph, int*& longest_cycle_nodes) {
 }
 
 
-// Funzione per deallocare la memoria del grafo
+
 void destroyGraph(Graph* graph) {
     if (graph == nullptr) return;
     for (int i = 0; i < graph->V; ++i) {
@@ -157,25 +157,25 @@ void destroyGraph(Graph* graph) {
     delete graph;
 }
 
-// Funzione main per testare il codice
+
 int main() {
     // Esempio con grafo disconnesso e cicli multipli
     std::cout << "--- Test con un grafo disconnesso ---" << std::endl;
     int V = 9;
     Graph* graph = createGraph(V);
 
-    // Componente 1: Ciclo di lunghezza 3
+    // Ciclo di lunghezza 3
     addEdge(graph, 0, 1);
     addEdge(graph, 1, 2);
     addEdge(graph, 2, 0);
 
-    // Componente 2: Ciclo di lunghezza 4
+    //  Ciclo di lunghezza 4
     addEdge(graph, 3, 4);
     addEdge(graph, 4, 5);
     addEdge(graph, 5, 6);
     addEdge(graph, 6, 3);
 
-    // Componente 3: Un percorso aciclico
+    // Un percorso aciclico
     addEdge(graph, 7, 8);
 
     int* longest_cycle_nodes = nullptr;
