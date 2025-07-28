@@ -80,9 +80,9 @@ void count_opt_sort_bitmap(int *A, int p, int r) {
     // Esempio: se range=10501, (10501+7)/8 = 1313 byte, 
     // sufficienti per rappresentare tutti i valori da 0 a 10500
     
-    // occorennze
+    // occorennze (unsigned short == cache performance)
     unsigned short *count = new unsigned short[range](); 
-    //valori "effettivamente" presenti
+    //valori "effettivamente" presenti nell'array
     unsigned char *bitmap = new unsigned char[bitmap_size]();
     int index = p;
 
@@ -96,31 +96,36 @@ void count_opt_sort_bitmap(int *A, int p, int r) {
         ct_read++; // Lettura count[idx]
         count[idx]++;
 
-        int byte_idx = idx / 8;
-        int bit_idx = idx % 8;
+        //es: indice 0 - 7 stanno nel byte 0, 
+        // 8 - 15 nel byte 1. (bit packing)
+
+        // risparmio memoria
+
+        int byte_idx = idx / 8; //in quale byte si trova il bit (idx)
+        int bit_idx = idx % 8; //posizione del bit nel byte
         ct_read++; // Lettura bitmap[byte_idx]
 
-        // Operatore & (AND bit a bit): controlla se il bit in posizione bit_idx è già attivo (presenza del valore)
+        // Operatore & (AND bit a bit): controlla se il bit in posizione bit_idx è spento (vale 0) (check presenza del valore)
         if ((bitmap[byte_idx] & (1 << bit_idx)) == 0) {
             // Operatore | (OR bit a bit): attiva il bit in posizione bit_idx per segnare la presenza del valore
             bitmap[byte_idx] |= (1 << bit_idx);
         }
     }
 
-    // 2 scrittura valori ordinati
+    // 2 scrittura valori ordinati (scorro bitmap al posto di tutto il range)
     for (int byte_idx = 0; byte_idx < bitmap_size; byte_idx++) {
         ct_read++; // Lettura bitmap[byte_idx]
         unsigned char byte = bitmap[byte_idx];
-        if (byte == 0) continue;
+        if (byte == 0) continue; //nessun valore è presente nell'array
         for (int bit_idx = 0; bit_idx < 8; bit_idx++) {
             // Operatore & (AND bit a bit): controlla se il bit in posizione bit_idx è attivo (valore presente)
             if (byte & (1 << bit_idx)) {
-                int val = byte_idx * 8 + bit_idx;
+                int val = byte_idx * 8 + bit_idx; //ripristino
                 if (val < range) {
                     ct_read++; // Lettura count[val]
-                    unsigned short freq = count[val];
+                    unsigned short freq = count[val]; //controllo quante volte contato
                     while (freq-- > 0) {
-                        A[index++] = val;
+                        A[index++] = val; //inserisce in A tante volte quanto la sua frequenza
                     }
                 }
             }
